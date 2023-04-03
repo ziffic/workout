@@ -2,9 +2,6 @@ import requests
 import connect
 from datetime import datetime
 
-NUTRITIONIX_ENDPOINT = "https://trackapi.nutritionix.com/v2/natural/exercise"
-SHEETY_ENDPOINT = f"https://api.sheety.co/{connect.SHEETY_USER_NAME}/" \
-                  f"{connect.SHEETY_PROJ_NAME}/{connect.SHEETY_SHEET_NAME}"
 exercise_text = input("Tell me which exercise you did: ")
 
 today_date = datetime.now().strftime("%d/%m/%Y")
@@ -18,27 +15,24 @@ params = {
     "age": connect.AGE
 }
 
-response = requests.post(url=NUTRITIONIX_ENDPOINT, json=params, headers=connect.headers)
+response = requests.post(url=connect.NUTRITIONIX_ENDPOINT, json=params, headers=connect.headers)
 results = response.json()
-# print(results["exercises"])
 
-for i in range(0, len(results["exercises"])):
-    print(today_date)
-    print(time_entered)
-    print(results["exercises"][i]["name"].title())
-    print(results["exercises"][i]["duration_min"])
-    print(results["exercises"][i]["nf_calories"])
-
+for exercise in results["exercises"]:
     sheety_params = {
         "workout": {
             "date": today_date,
             "time": time_entered,
-            "exercise": results["exercises"][i]["name"].title(),
-            "duration": results["exercises"][i]["duration_min"],
-            "calories": results["exercises"][i]["nf_calories"]
+            "exercise": exercise["name"].title(),
+            "duration": exercise["duration_min"],
+            "calories": exercise["nf_calories"]
         }
     }
-    sheety_response = requests.post(url=SHEETY_ENDPOINT, json=sheety_params, headers=connect.sheety_headers)
+
+    sheety_response = requests.post(url=connect.SHEETY_ENDPOINT,
+                                    json=sheety_params,
+                                    headers=connect.sheety_headers
+                                    )
     sheety_results = sheety_response.json()
     print(sheety_results)
 
